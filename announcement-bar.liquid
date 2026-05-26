@@ -1,0 +1,230 @@
+{% comment %}
+  Announcement Bar Section
+  - Text, background color, and text color configurable via Theme Editor
+  - Dismissible via sessionStorage (won't reappear in same browser session)
+  - Fully responsive for mobile and desktop
+{% endcomment %}
+ 
+{%- if section.settings.announcement_text != blank -%} 
+<div
+  id="announcement-bar"
+  class="announcement-bar"
+  role="banner"
+  aria-label="Announcement"
+  style="
+    --bar-bg: {{ section.settings.background_color }};
+    --bar-color: {{ section.settings.text_color }};
+    display: none;
+  "
+>
+  <div class="announcement-bar__inner">
+    <p class="announcement-bar__text">
+        {{- section.settings.announcement_text | escape -}}
+     </p>
+  </div>
+
+  {%- if section.settings.show_close_button -%}
+    <button
+      class="announcement-bar__close"
+      id="announcement-bar-close"
+      aria-label="Dismiss announcement"
+      type="button"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M1 1L13 13M13 1L1 13"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+        />
+      </svg>
+    </button>
+  {%- endif -%}
+</div>
+
+<style>
+  .announcement-bar {
+    background-color: var(--bar-bg, #1a1a1a);
+    color: var(--bar-color, #ffffff);
+    width: 100%;
+    position: relative;
+    z-index: 100;
+    box-sizing: border-box;
+  }
+
+  .announcement-bar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 48px;
+    min-height: 44px;
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .announcement-bar__text {
+    font-size: 14px;
+    line-height: 1.4;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    font-family: inherit;
+    color: inherit;
+  }
+  .announcement-bar__close {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    opacity: 0.75;
+    transition: opacity 0.15s ease, background-color 0.15s ease;
+    line-height: 0;
+  }
+
+  .announcement-bar__close:hover {
+    opacity: 1;
+    background-color: rgba(128, 128, 128, 0.2);
+  }
+
+  .announcement-bar__close:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+    opacity: 1;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .announcement-bar--visible {
+    animation: slideDown 0.3s ease forwards;
+  }
+
+  @media (max-width: 480px) {
+    .announcement-bar__inner {
+      padding: 10px 40px;
+      min-height: 40px;
+    }
+
+    .announcement-bar__text {
+      font-size: 13px;
+    }
+
+    .announcement-bar__close {
+      right: 10px;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'announcement_bar_dismissed_{{ section.id }}';
+    var bar = document.getElementById('announcement-bar');
+    var closeBtn = document.getElementById('announcement-bar-close');
+
+    if (!bar) return;
+    var isDismissed = sessionStorage.getItem(STORAGE_KEY);
+
+    if (!isDismissed) {
+      bar.style.display = 'block';
+      requestAnimationFrame(function () {
+        bar.classList.add('announcement-bar--visible');
+      });
+    }
+
+    if (closeBtn) {
+      closeBtn.addEventListener('click', function () {
+        bar.style.animation = 'none';
+        bar.style.transition = 'opacity 0.2s ease, max-height 0.3s ease';
+        bar.style.overflow = 'hidden';
+        bar.style.opacity = '0';
+        bar.style.maxHeight = bar.offsetHeight + 'px';
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            bar.style.maxHeight = '0';
+          });
+        });
+
+        bar.addEventListener('transitionend', function onEnd() {
+          bar.style.display = 'none';
+          bar.removeEventListener('transitionend', onEnd);
+        });
+
+        try {
+          sessionStorage.setItem(STORAGE_KEY, '1');
+        } catch (e) {
+          // sessionStorage unavailable 
+        }
+      });
+    }
+  })();
+</script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Announcement Bar Custom",
+  "tag": "section",
+  "class": "announcement-bar-section",
+  "limit": 2,
+  "enabled_on": {
+    "groups": ["header"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "announcement_text",
+      "label": "Announcement text",
+      "default": "Announcement Text Like Free Shipping"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_close_button",
+      "label": "Show close button",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Announcement Bar Custom"
+    }
+  ]
+}
+{% endschema %} 
