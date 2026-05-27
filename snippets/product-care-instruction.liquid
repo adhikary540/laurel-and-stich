@@ -1,0 +1,321 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
+
+  .care-wrap {
+    width: 100%;
+    margin: 3rem auto;
+    font-family: 'Jost', sans-serif;
+  }
+
+  .care-heading {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    color: #1a1a1a;
+    margin: 0 0 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e0d8cf;
+    position: relative;
+  }
+
+  .care-heading::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 2.5rem;
+    height: 1.5px;
+    background: #7a6652;
+  }
+
+ 
+  .care-empty {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 1rem 1.25rem;
+    background: #faf8f5;
+    border: 1px dashed #d5ccc3;
+    border-radius: 4px;
+    font-size: 0.8125rem;
+    color: #9e9189;
+    letter-spacing: 0.03em;
+  }
+
+  .care-empty svg {
+    flex-shrink: 0;
+    opacity: 0.5;
+  }
+
+
+  .care-instructions {
+    border: 1px solid #e8e2db;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03);
+    transition: box-shadow 0.2s ease;
+  }
+
+  .care-instructions:hover {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 6px 24px rgba(0,0,0,0.06);
+  }
+
+
+  .care-instructions__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 1.1rem 1.4rem;
+    background: #faf8f5;
+    border: none;
+    cursor: pointer;
+    color: #1a1a1a;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: left;
+    gap: 12px;
+    transition: background 0.2s ease;
+  }
+
+  .care-instructions__trigger:hover {
+    background: #f3ede6;
+  }
+
+  .care-instructions__trigger:focus-visible {
+    outline: 2px solid #7a6652;
+    outline-offset: -2px;
+  }
+
+  .care-instructions__trigger-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+
+  .care-icon-wrap {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ede7df;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s ease;
+  }
+
+  .care-instructions__trigger:hover .care-icon-wrap {
+    background: #e0d4c7;
+  }
+
+  .care-instructions[data-open] .care-icon-wrap {
+    background: #7a6652;
+    color: #fff;
+  }
+
+
+  .care-instructions__chevron {
+    flex-shrink: 0;
+    color: #7a6652;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .care-instructions[data-open] .care-instructions__chevron {
+    transform: rotate(180deg);
+  }
+
+
+  .care-instructions__panel {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    border-top: 0px solid #e8e2db;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-top-width 0s 0.35s;
+  }
+
+  .care-instructions__panel[hidden] {
+    display: block !important;
+    max-height: 0;
+    visibility: hidden;
+  }
+
+  .care-instructions__panel:not([hidden]) {
+    visibility: visible;
+    border-top: 1px solid #e8e2db;
+    transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), border-top-width 0s 0s;
+  }
+
+  .care-instructions__body {
+    padding: 1.4rem 1.4rem 1.6rem;
+    font-size: 0.875rem;
+    line-height: 1.85;
+    color: #4a4540;
+    background: #fff;
+  }
+
+ .care-instructions__body br {
+    display: block;
+    content: '';
+    margin-top: 0.3em;
+  }
+
+  .care-instructions__body-inner {
+    border-left: 2px solid #e0d4c7;
+    padding-left: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    .care-wrap {
+      width: 100%;
+      margin: 2rem 0;
+    }
+    .care-instructions__trigger {
+      padding: 1rem 1.1rem;
+      font-size: 0.75rem;
+    }
+    .care-instructions__body {
+      padding: 1.1rem 1.1rem 1.3rem;
+    }
+  }
+</style>
+
+{%- liquid
+  assign care_raw = product.metafields.custom.care_instructions.value
+  assign care_text = care_raw | strip
+-%}
+
+{%- assign accordion_id = 'care-instructions-' | append: product.id -%}
+
+<div class="care-wrap">
+
+  {%- if section.settings.product_care_instruction_heading != blank -%}
+    <h3 class="care-heading">{{ section.settings.product_care_instruction_heading }}</h3>
+  {%- endif -%}
+
+  {%- if care_text != blank -%}
+
+    <div class="care-instructions" id="{{ accordion_id }}">
+      <button
+        class="care-instructions__trigger"
+        type="button"
+        aria-expanded="false"
+        aria-controls="{{ accordion_id }}-panel"
+      >
+        <span class="care-instructions__trigger-label">
+          <span class="care-icon-wrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+              fill="none" stroke="currentColor" stroke-width="1.75"
+              stroke-linecap="round" stroke-linejoin="round"
+              aria-hidden="true" focusable="false">
+              <rect x="2" y="2" width="20" height="20" rx="3"/>
+              <circle cx="12" cy="13" r="5"/>
+              <path d="M7 7h.01M11 7h3"/>
+            </svg>
+          </span>
+          Care Instructions
+        </span>
+
+        <svg class="care-instructions__chevron"
+          xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          aria-hidden="true" focusable="false">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+
+      <div
+        class="care-instructions__panel"
+        id="{{ accordion_id }}-panel"
+        role="region"
+        aria-labelledby="{{ accordion_id }}-trigger"
+        hidden
+      >
+        <div class="care-instructions__body">
+          <div class="care-instructions__body-inner">
+            {{ care_text | newline_to_br }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  {%- else -%}
+
+    <div class="care-empty" role="status">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+        viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+        aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      No care instructions available for this product.
+    </div>
+
+  {%- endif -%}
+
+</div>
+
+<script>
+  (function () {
+    var wrapper = document.getElementById('{{ accordion_id }}');
+    if (!wrapper) return;
+
+    var trigger = wrapper.querySelector('.care-instructions__trigger');
+    var panel   = wrapper.querySelector('.care-instructions__panel');
+    if (!trigger || !panel) return;
+
+    function getContentHeight() {
+      var wasHidden = panel.hasAttribute('hidden');
+      if (wasHidden) {
+        panel.style.visibility = 'hidden';
+        panel.removeAttribute('hidden');
+      }
+      var h = panel.scrollHeight;
+      if (wasHidden) {
+        panel.setAttribute('hidden', '');
+        panel.style.visibility = '';
+      }
+      return h;
+    }
+
+    function open() {
+      panel.removeAttribute('hidden');
+      panel.style.maxHeight = getContentHeight() + 'px';
+      trigger.setAttribute('aria-expanded', 'true');
+      wrapper.setAttribute('data-open', '');
+    }
+
+    function close() {
+      panel.style.maxHeight = '0';
+      trigger.setAttribute('aria-expanded', 'false');
+      wrapper.removeAttribute('data-open');
+      panel.addEventListener('transitionend', function onDone() {
+        if (trigger.getAttribute('aria-expanded') === 'false') {
+          panel.setAttribute('hidden', '');
+        }
+        panel.removeEventListener('transitionend', onDone);
+      });
+    }
+
+    trigger.addEventListener('click', function () {
+      trigger.getAttribute('aria-expanded') === 'true' ? close() : open();
+    });
+
+    wrapper.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') {
+        close();
+        trigger.focus();
+      }
+    });
+  })();
+</script>
+
